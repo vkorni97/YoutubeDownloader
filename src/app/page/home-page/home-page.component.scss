@@ -1,0 +1,17 @@
+.homeContainer {
+	height: calc(100vh - 40px);
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+
+	.animate {
+		font-size: 30px;
+		color: white;
+
+		&:last-child {
+			font-weight: bold;
+		}
+	}
+}

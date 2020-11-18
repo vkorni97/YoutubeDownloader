@@ -1,0 +1,12 @@
+appId: youtube.downloader.app
+
+productName: YoutubeDownloader
+artifactName: "${productName}-${arch}.${ext}"
+asar: false
+directories:
+  buildResources: "frontend"
+  output: "release"
+
+files:
+  - "!**/*"
+  - "frontend/**/*"
