@@ -1,0 +1,79 @@
+@import '../../../assets/variables';
+
+.itemContainer {
+	width: 100%;
+	height: 120px;
+	border-radius: 8px;
+	margin: 10px 0;
+	position: relative;
+
+	.background {
+		width: 100%;
+		height: 100%;
+		border-radius: 8px;
+		overflow: hidden;
+		position: relative;
+
+		img {
+			object-fit: cover;
+			width: 100%;
+			height: 100%;
+		}
+
+		.blur {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba($color: black, $alpha: .25);
+			//opacity: .3;
+			backdrop-filter: blur(5px);
+			z-index: 1;
+
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+		}
+	}
+
+	.actionContainer {
+		flex: 1;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		gap: 10px;
+
+		.action {
+			cursor: pointer;
+			color: white;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 50px;
+			width: 50px;
+			border-radius: 50%;
+			background-color: rgba($color: #000000, $alpha: .4);
+		}
+	}
+
+	.infoContainer {
+		width: 100%;
+		z-index: 2;
+		color: $font-secondary;
+		background-color: rgba($color: #000000, $alpha: .25);
+		padding: 5px;
+		text-align: center;
+		border-radius: 8px;
+
+		.info {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: normal;
+		}
+	}
+}

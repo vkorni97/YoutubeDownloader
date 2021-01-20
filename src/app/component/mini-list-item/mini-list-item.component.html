@@ -1,0 +1,21 @@
+<div class="itemContainer">
+  <div class="background">
+    <img [src]="item.info.videoDetails.thumbnails[0].url" alt="">
+    <div class="blur">
+      <div class="actionContainer">
+        <div class="action">
+          <mat-icon (click)="handleItemAction('file')">play_arrow</mat-icon>
+        </div>
+        <div class="action">
+          <mat-icon (click)="handleItemAction('folder')">folder</mat-icon>
+        </div>
+      </div>
+      <div class="infoContainer">
+        <div class="info">
+          {{item.info.videoDetails.title}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

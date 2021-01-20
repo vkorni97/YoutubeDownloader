@@ -1,0 +1,32 @@
+<div *ngIf="item" class="itemContainer">
+  <div class="closeButton" (click)="handleItemRemove()">
+    <mat-icon>close</mat-icon>
+  </div>
+  <div class="thumbContainer">
+    <img [src]="item.info.videoDetails.thumbnails[0].url">
+    <div class="time">
+      {{item.info.videoDetails.lengthSeconds|time}}
+    </div>
+  </div>
+  <div class="infoContainer">
+    <div class="title" [title]="item.info.videoDetails.title">
+      {{item.info.videoDetails.title}}
+    </div>
+    <div class="actions">
+      <app-progress-bar *ngIf="item.progress" [progress]="item.progress"></app-progress-bar>
+      <div class="buttonContainer" (click)="handleItemDownload()">
+        <app-button>
+          <mat-icon *ngIf="!item.downloading && item.progress == 0">
+            get_app
+          </mat-icon>
+          <mat-icon *ngIf="item.downloading">
+            pause
+          </mat-icon>
+          <mat-icon *ngIf="item.progress != 0 && !item.downloading">
+            play_arrow
+          </mat-icon>
+        </app-button>
+      </div>
+    </div>
+  </div>
+</div>

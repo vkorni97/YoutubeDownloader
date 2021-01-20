@@ -1,6 +1,21 @@
-<div class="homeContainer" [@slideIn]>
-  <div class="animate">Google&nbsp;</div>
-  <div class="animate">it,&nbsp;</div>
-  <div class="animate">Bitch&nbsp;</div>
-  <div class="animate">:)</div>
+<div class="homeContainer">
+  <div class="contentContainer">
+    <div class="title">Items in list - {{onQueue.length}}</div>
+    <div class="listContainer">
+      <app-list-item [@animateIn] *ngFor="let item of onQueue" [item]="item"
+        (removeItem)="handleItemRemove(item, 'onQueue')" (downloadItem)="handleDownloadItem(item)"></app-list-item>
+    </div>
+  </div>
+  <div class="completedContainer">
+    <div class="title">Completed - {{completed.length}}</div>
+    <div class="completedList">
+      <div class="emptyContainer" *ngIf="!completed.length">
+        <div class="emptyTitle">List is empty</div>
+        <div class="emptyText">Downloaded files will appear here</div>
+      </div>
+      <app-mini-list-item [@animateInMini] *ngFor="let item of completed" [item]="item"
+        (removeItem)="handleItemRemove(item, 'completed')" (handleAction)="handleFolderOpen($event, item)">
+      </app-mini-list-item>
+    </div>
+  </div>
 </div>

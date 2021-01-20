@@ -1,0 +1,15 @@
+@import '../../../assets/variables';
+
+.progressContainer {
+	width: 100%;
+	height: 5px;
+	border-radius: 8px;
+	background-color: $bg-secondary;
+	overflow: hidden;
+
+	div {
+		height: 100%;
+		border-radius: 8px;
+		background-color: $green;
+	}
+}

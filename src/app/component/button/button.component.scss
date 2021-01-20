@@ -1,0 +1,22 @@
+@import '../../../assets/variables';
+
+.buttonContainer {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 80px;
+	height: 20px;
+	text-align: center;
+	border: none;
+	outline: none;
+	padding: 0;
+	cursor: pointer;
+	overflow: hidden;
+	background-color: $green;
+	clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
+
+	&:active {
+		transform: scale(.95);
+	}
+}
