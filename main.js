@@ -2,6 +2,23 @@ const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const clipboard = require('electron-clipboard-extended');
 const isDev = Object.values(process.env).some((str) => str.includes('electron .'));
 const { pause, resume } = require('./scripts/ffmpeg_utils');
+const fs = require('fs');
+
+var path = app.getPath('appData');
+if (process.platform === 'win32') path += '\\youtube-downloader\\';
+else path += '/youtube-downloader/';
+path += 'config.json';
+
+if (!fs.existsSync(path)) {
+	var options = {
+		path: `${app.getPath('music')}${process.platform === 'win32' ? '\\' : '/'}`,
+		parralelNumber: 3,
+		playlist: {
+			size: 500
+		}
+	};
+	fs.writeFileSync(path, JSON.stringify(options), 'utf8');
+}
 
 let win;
 let createWindow = () => {
@@ -26,10 +43,8 @@ let createWindow = () => {
 					link
 				) ||
 				/http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/)*/.test(link)
-			) {
-				console.log(link);
+			)
 				win.webContents.send('link', link);
-			}
 		})
 		.startWatching();
 
@@ -52,21 +67,21 @@ let createWindow = () => {
 		clipboard.stopWatching();
 		win = null;
 	});
+	ipcMain.on('requestConfigPath', () => {
+		win.webContents.send('configPath', path);
+	});
 
 	if (isDev) {
+		win.webContents.openDevTools();
 		try {
 			require('electron-reloader')(module);
-			win.webContents.openDevTools();
 		} catch (_) {}
 	}
 	//--------------------------------
 	ipcMain.on('stopFFMPEG', (event, pid) => {
-		console.log(pid, typeof pid);
 		pause(pid);
 	});
 	ipcMain.on('startFFMPEG', (event, pid) => {
-		console.log(pid, typeof pid);
-
 		resume(pid);
 	});
 	ipcMain.on('folder', (event, path) => {

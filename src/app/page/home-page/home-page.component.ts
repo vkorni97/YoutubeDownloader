@@ -1,82 +1,113 @@
-import { animate, query, style, transition, trigger } from '@angular/animations';
-import { Component, NgZone, OnInit } from '@angular/core';
-import { ListItemActions } from 'src/app/interface/all';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ListItemActions, Options } from 'src/app/interface/all';
 import { FileInfo } from 'src/app/model/file-info.model';
+import { StoreService } from 'src/app/service/store.service';
 import { UtilsService } from 'src/app/service/utils.service';
 import { downloadOptions } from 'ytdl-core';
 
 @Component({
 	selector: 'app-home-page',
 	templateUrl: './home-page.component.html',
-	styleUrls: [ './home-page.component.scss' ],
-	animations: [
-		trigger('animateIn', [
-			transition(':enter', [
-				style({ opacity: 0, transform: 'translate3d(-40px, 0, 0)' }),
-				query('.thumbContainer .time', [ style({ opacity: 0, transform: 'translate3d(-100%, 0, 0)' }) ]),
-				animate('.25s ease-in', style('*')),
-				query('.thumbContainer .time', [ animate('.25s .25s ease-out', style('*')) ])
-			]),
-			transition(':leave', [
-				animate('.25s ease-out', style({ opacity: 0, transform: 'translate3d(40px, 0, 0)' }))
-			])
-		]),
-		trigger('animateInMini', [
-			transition(':enter', [
-				style({ opacity: 0, transform: 'translate3d(-40px, 0, 0)' }),
-				animate('.25s ease-in', style('*'))
-			]),
-			transition(':leave', [
-				animate('.25s ease-out', style({ opacity: 0, transform: 'translate3d(40px, 0, 0)' }))
-			])
-		])
-	]
+	styleUrls: [ './home-page.component.scss' ]
 })
-export class HomePageComponent implements OnInit {
-	public onQueue: FileInfo[] = [];
+export class HomePageComponent implements OnInit, OnDestroy {
+	public downloading: FileInfo[] = [];
 	public completed: FileInfo[] = [];
+	public onQueue: string[] = [];
+	public isLoading: boolean;
 
-	constructor(private utils: UtilsService, private zone: NgZone) {
+	private subscription: Subscription;
+	private options: Options;
+
+	constructor(private utils: UtilsService, private zone: NgZone, private store: StoreService) {
+		this.subscription = this.store.options.subscribe((dt) => {
+			console.log(dt);
+			if (dt) this.options = dt;
+		});
+	}
+
+	ngOnDestroy(): void {
+		this.subscription.unsubscribe();
+	}
+
+	ngOnInit(): void {
 		this.utils.ipcRenderer.on('link', (_, link) => {
 			this.zone.run(() => {
 				this.checkLink(link);
 			});
 		});
-		JSON.parse(localStorage.getItem('links') || '[]').forEach((link) => {
-			this.checkLink(link);
-		});
+		let links: string[] = JSON.parse(localStorage.getItem('links') || '[]');
+		if (links.length) {
+			this.onQueue = [ ...this.onQueue, ...links ];
+			if (!this.isLoading) {
+				this.isLoading = true;
+				this.addList(this.onQueue.splice(0, 5));
+			}
+		}
 	}
-
-	ngOnInit(): void {}
 
 	private async checkLink(link: string) {
 		if (link.includes('channel') || link.includes('list')) {
-			//console.log(link);
-			let list = await this.utils.ytpl(link, { limit: 20 });
-			console.log(list);
+			try {
+				let list = await this.utils.ytpl(link, { limit: this.options.playlist.size });
+				if (list.items.length) {
+					this.onQueue = [ ...this.onQueue, ...list.items.map((v) => v.shortUrl) ];
+					if (!this.isLoading) {
+						this.isLoading = true;
+						this.addList(this.onQueue.splice(0, 5));
+					}
+				}
+			} catch (error) {
+				this.addToList(link);
+			}
 		} else {
 			this.addToList(link);
 		}
 	}
 
-	private addToList(link: string) {
-		this.utils.ytdl.getBasicInfo(link).then((info) => {
-			if (!this.onQueue.some((i) => i.url == info.videoDetails.video_url)) {
-				this.onQueue.push(
-					new FileInfo({
-						created_at: new Date().getTime(),
-						info: info,
-						url: info.videoDetails.video_url,
-						path: `C:\\Users\\Kornel\\Music\\${info.videoDetails.title.replace(/[*'/":<>?\\|]/g, '_')}.mp3`
-					})
-				);
-			}
+	private addList(list: string[]) {
+		for (let i = 0; i < list.length; i++) {
+			this.recursiveAdd(list[i], i);
+		}
+	}
+
+	private recursiveAdd(link: string, i: number) {
+		this.addToList(link).then(() => {
+			if (this.onQueue.length) this.recursiveAdd(this.onQueue.shift(), i);
+			else this.isLoading = false;
 		});
 	}
 
-	handleItemRemove(item: FileInfo, type: 'onQueue' | 'completed') {
+	private addToList(link: string) {
+		return new Promise((resolve, reject) => {
+			this.utils.ytdl.getBasicInfo(link).then((info) => {
+				if (!this.downloading.some((i) => i.url == info.videoDetails.video_url)) {
+					this.downloading = [
+						...this.downloading,
+						new FileInfo({
+							created_at: new Date().getTime(),
+							file_duration: info.videoDetails.lengthSeconds,
+							file_thumbnail: info.videoDetails.thumbnails.shift().url,
+							file_title: info.videoDetails.title,
+							url: info.videoDetails.video_url,
+							path: `${this.options.path}${info.videoDetails.title.replace(/[*'/":<>?\\|]/g, '_')}.mp3`
+						})
+					];
+					console.log(this.downloading);
+					resolve(true);
+				}
+			});
+		});
+	}
+
+	handleItemRemove(item: FileInfo, type: string) {
 		this[type] = this[type].filter((i) => i.url !== item.url);
-		if (type == 'onQueue') localStorage.setItem('links', JSON.stringify(this.onQueue.map((i) => i.url)));
+		if (type == 'downloading') this.saveLinks();
+	}
+
+	private saveLinks() {
+		localStorage.setItem('links', JSON.stringify(this.downloading.map((i) => i.url)));
 	}
 
 	handleFolderOpen(action: ListItemActions, item: FileInfo) {
@@ -95,11 +126,11 @@ export class HomePageComponent implements OnInit {
 				var options: downloadOptions = {
 					quality: 'highest',
 					filter: 'audio',
-					highWaterMark: 0
+					highWaterMark: 1024 * 1024 * 1024
 				};
 				if (!this.utils.fs.existsSync(item.path)) {
 					item.downloading = true;
-					item.audio = this.utils
+					let audio = this.utils
 						.ytdl(item.url, options)
 						.on('progress', (length, downloaded, totallength) => {
 							//if (!item.downloading) item.audio.pause();
@@ -111,16 +142,17 @@ export class HomePageComponent implements OnInit {
 							}
 						})
 						.on('error', (err) => console.log(err));
-					item.convert = this.utils.ffmpeg(item.audio).toFormat('mp3').save(item.path);
+					item.convert = this.utils.ffmpeg(audio).toFormat('mp3').save(item.path);
 					item.convert
 						.on('start', () => {
 							item.pid = item.convert['ffmpegProc'].pid;
 						})
 						.on('end', () => {
+							audio = undefined;
 							this.zone.run(() => {
 								this.completed.push(item);
-								this.onQueue = this.onQueue.filter((i) => i != item);
-								localStorage.setItem('links', JSON.stringify(this.onQueue.map((i) => i.url)));
+								this.downloading = this.downloading.filter((i) => i != item);
+								localStorage.setItem('links', JSON.stringify(this.downloading.map((i) => i.url)));
 							});
 						})
 						.on('error', (err) => {
@@ -169,8 +201,8 @@ export class HomePageComponent implements OnInit {
 					// 	});
 				} else {
 					this.completed.push(item);
-					this.onQueue = this.onQueue.filter((i) => i != item);
-					localStorage.setItem('links', JSON.stringify(this.onQueue.map((i) => i.url)));
+					this.downloading = this.downloading.filter((i) => i != item);
+					localStorage.setItem('links', JSON.stringify(this.downloading.map((i) => i.url)));
 				}
 			}
 		}

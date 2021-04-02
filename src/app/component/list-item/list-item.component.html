@@ -3,14 +3,14 @@
     <mat-icon>close</mat-icon>
   </div>
   <div class="thumbContainer">
-    <img [src]="item.info.videoDetails.thumbnails[0].url">
-    <div class="time">
-      {{item.info.videoDetails.lengthSeconds|time}}
+    <img [src]="item.file_thumbnail">
+    <div @animateIn class="time">
+      {{item.file_duration|time}}
     </div>
   </div>
   <div class="infoContainer">
-    <div class="title" [title]="item.info.videoDetails.title">
-      {{item.info.videoDetails.title}}
+    <div class="title" [title]="item.file_title">
+      {{item.file_title}}
     </div>
     <div class="actions">
       <app-progress-bar *ngIf="item.progress" [progress]="item.progress"></app-progress-bar>

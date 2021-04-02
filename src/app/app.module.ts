@@ -13,10 +13,19 @@ import { ButtonComponent } from './component/button/button.component';
 import { TimePipe } from './pipe/time.pipe';
 import { ProgressBarComponent } from './component/progress-bar/progress-bar.component';
 import { MiniListItemComponent } from './component/mini-list-item/mini-list-item.component';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 @NgModule({
-	declarations: [ AppComponent, HomePageComponent, ListItemComponent, ButtonComponent, TimePipe, ProgressBarComponent, MiniListItemComponent ],
-	imports: [ BrowserModule, AppRoutingModule, BrowserAnimationsModule, MatIconModule ],
+	declarations: [
+		AppComponent,
+		HomePageComponent,
+		ListItemComponent,
+		ButtonComponent,
+		TimePipe,
+		ProgressBarComponent,
+		MiniListItemComponent
+	],
+	imports: [ BrowserModule, AppRoutingModule, BrowserAnimationsModule, MatIconModule, ScrollingModule ],
 	providers: [ UtilsService ],
 	bootstrap: [ AppComponent ]
 })

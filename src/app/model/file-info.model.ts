@@ -4,8 +4,9 @@ import type { videoInfo } from 'ytdl-core';
 
 export class FileInfo {
 	created_at: number;
-	info: videoInfo;
-	audio: Readable = undefined;
+	file_thumbnail: string;
+	file_title: string;
+	file_duration: string;
 	convert: FfmpegCommand = undefined;
 	pid: number;
 	downloading: boolean = false;

@@ -1,13 +1,19 @@
 import { animate, group, query, style, transition, trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FileInfo } from 'src/app/model/file-info.model';
-import { videoInfo } from 'ytdl-core';
 
 @Component({
 	selector: 'app-list-item',
 	templateUrl: './list-item.component.html',
 	styleUrls: [ './list-item.component.scss' ],
-	animations: []
+	animations: [
+		trigger('animateIn', [
+			transition(':enter', [
+				style({ opacity: 0, transform: 'translate3d(-100%, 0, 0)' }),
+				animate('.25s .5s ease-in', style('*'))
+			])
+		])
+	]
 })
 export class ListItemComponent implements OnInit {
 	@Input() item: FileInfo;

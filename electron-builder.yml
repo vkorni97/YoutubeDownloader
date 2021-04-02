@@ -13,3 +13,4 @@ files:
   - "!**/*"
   - "frontend/**/*"
   - "node_modules/ffmpeg-static-electron/bin/${os}/${arch}/**/*"
+  # - "node_modules/ntsuspend/**/*"

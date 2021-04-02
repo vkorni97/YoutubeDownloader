@@ -4,8 +4,11 @@ let common_config = {
 	node: {
 		__dirname: false
 	},
+	module: {
+		rules: [ { test: /\.node$/, loader: 'node-loader' } ]
+	},
 	mode: 'production',
-	target: 'web',
+	target: 'node',
 	resolve: {
 		extensions: [ '.js' ]
 	}

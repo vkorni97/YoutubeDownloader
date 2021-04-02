@@ -1,10 +1,20 @@
 <div class="homeContainer">
   <div class="contentContainer">
-    <div class="title">Items in list - {{onQueue.length}}</div>
-    <div class="listContainer">
-      <app-list-item [@animateIn] *ngFor="let item of onQueue" [item]="item"
-        (removeItem)="handleItemRemove(item, 'onQueue')" (downloadItem)="handleDownloadItem(item)"></app-list-item>
+    <div class="title">
+      <div>
+        Items in list - {{downloading.length}}
+      </div>
+      <div class="spinner" *ngIf="isLoading">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
     </div>
+    <cdk-virtual-scroll-viewport style="height: 100vh;" [maxBufferPx]='1000' [minBufferPx]='1000' [itemSize]="120"
+      class="listContainer">
+      <app-list-item *cdkVirtualFor="let item of downloading" [item]="item"
+        (removeItem)="handleItemRemove(item, 'downloading')" (downloadItem)="handleDownloadItem(item)"></app-list-item>
+    </cdk-virtual-scroll-viewport>
   </div>
   <div class="completedContainer">
     <div class="title">Completed - {{completed.length}}</div>
@@ -13,7 +23,7 @@
         <div class="emptyTitle">List is empty</div>
         <div class="emptyText">Downloaded files will appear here</div>
       </div>
-      <app-mini-list-item [@animateInMini] *ngFor="let item of completed" [item]="item"
+      <app-mini-list-item *ngFor="let item of completed" [item]="item"
         (removeItem)="handleItemRemove(item, 'completed')" (handleAction)="handleFolderOpen($event, item)">
       </app-mini-list-item>
     </div>
